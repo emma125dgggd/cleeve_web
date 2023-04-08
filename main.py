@@ -239,7 +239,7 @@ if selected_icon == icon_options["Home"]:
                                                    accept_multiple_files=True)
         
 
-        if img_file_buffer is None:'
+        if img_file_buffer is None:
             img_file = st.file_uploader("Upload an image", type=["jpg"],
                                         accept_multiple_files=True, key=1)
             def counter():

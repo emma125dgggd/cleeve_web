@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+  cleeve-web:
+    restart: always
+    image: cleeve/web
+    build:
+      context: .
+    networks:
+      - traefik-access
+      - default
+    volumes:
+      - ./run.sh:/app/run.sh
+    labels:
+     - "traefik.enable=true"
+     - "traefik.docker.network=traefik-access"
+     - "traefik.http.routers.cleeve-web.rule=Host(`cleeve-web.dev.ksbadesua.net`)"
+     - "traefik.http.routers.cleeve-web.entrypoints=https"
+     - "traefik.http.routers.cleeve-web.tls=true"
+     - "traefik.http.routers.cleeve-web.tls.certresolver=le"
+     - "traefik.http.services.cleeve-web.loadbalancer.server.port=8501"
+
+networks:
+  traefik-access:
+    external: true
+    name: traefik-access
