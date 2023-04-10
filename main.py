@@ -10,13 +10,26 @@ import cv2
 import torch
 import numpy as np
 from numpy import random
-from models.experimental import attempt_load
-from utils.datasets import LoadStreams, LoadImages
-from utils.general import check_img_size, check_requirements, check_imshow, non_max_suppression, apply_classifier, \
-    scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path
-from utils.plots import plot_one_box
-from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 
+impimport time
+
+import ort time
+
+import requests
+
+import random
+
+import numpy as np
+
+from PIL import Image
+
+from pathlib import Path
+
+from collections import OrderedDict,namedtuple
+
+import tensorflow as tf
+
+import matplotlib.pyplot as plt
 
 
 
@@ -243,35 +256,88 @@ if selected_icon == icon_options["Home"]:
             img_file = st.file_uploader("Upload an image", type=["jpg"],
                                         accept_multiple_files=True, key=1)
             def counter():
-                img = letterbox(img0, imgsz, stride=stride)[0]
-                img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
-                img = np.ascontiguousarray(img)
-                img = torch.from_numpy(img).to(device)
-                img = img.half() if half else img.float()  # uint8 to fp16/32
-                img /= 255.0  # 0 - 255 to 0.0 - 1.0
-                if img.ndimension() == 3:
-                  img = img.unsqueeze(0)
+                import cv2
 
-                # Inference
-                t1 = time_synchronized()
-                pred = model(img, augment= False)[0]
+# Load the TFLite model and allocate tensors.
+interpreter = tf.lite.Interpreter(model_path="/content/yolov7_model.tflite")
 
 
-                pred = non_max_suppression(pred, opt['conf-thres'], opt['iou-thres'], classes= classes, agnostic= False)
-                t2 = time_synchronized()
-                for i, det in enumerate(pred):
-                  s = ''
-                  s += '%gx%g ' % img.shape[2:]  # print string
-                  gn = torch.tensor(img0.shape)[[1, 0, 1, 0]]
-                  if len(det):
-                    det[:, :4] = scale_coords(img.shape[2:], det[:, :4], img0.shape).round()
 
-                    for c in det[:, -1].unique():
-                      n = (det[:, -1] == c).sum()  # detections per class
-                      s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
 
-                   
-            counter()
+
+def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleup=True, stride=32):
+    # Resize and pad image while meeting stride-multiple constraints
+    shape = im.shape[:2]  # current shape [height, width]
+    if isinstance(new_shape, int):
+        new_shape = (new_shape, new_shape)
+
+    # Scale ratio (new / old)
+    r = min(new_shape[0] / shape[0], new_shape[1] / shape[1])
+    if not scaleup:  # only scale down, do not scale up (for better val mAP)
+        r = min(r, 1.0)
+
+    # Compute padding
+    new_unpad = int(round(shape[1] * r)), int(round(shape[0] * r))
+    dw, dh = new_shape[1] - new_unpad[0], new_shape[0] - new_unpad[1]  # wh padding
+
+    if auto:  # minimum rectangle
+        dw, dh = np.mod(dw, stride), np.mod(dh, stride)  # wh padding
+
+    dw /= 2  # divide padding into 2 sides
+    dh /= 2
+
+    if shape[::-1] != new_unpad:  # resize
+        im = cv2.resize(im, new_unpad, interpolation=cv2.INTER_LINEAR)
+    top, bottom = int(round(dh - 0.1)), int(round(dh + 0.1))
+    left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
+    im = cv2.copyMakeBorder(im, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)  # add border
+    return im, r, (dw, dh)
+
+#Name of the classes according to class indices.
+names = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light',
+         'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
+         'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
+         'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard',
+         'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
+         'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
+         'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
+         'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear',
+         'hair drier', 'toothbrush']
+
+#Creating random colors for bounding box visualization.
+colors = {name:[random.randint(0, 255) for _ in range(3)] for i,name in enumerate(names)}
+
+#Load and preprocess the image.
+img = cv2.imread('/content/yolov7/inference/images/bus.jpg')
+img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+image = img.copy()
+image, ratio, dwdh = letterbox(image, auto=False)
+image = image.transpose((2, 0, 1))
+image = np.expand_dims(image, 0)
+image = np.ascontiguousarray(image)
+
+im = image.astype(np.float32)
+im /= 255
+
+
+#Allocate tensors.
+interpreter.allocate_tensors()
+# Get input and output tensors.
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
+
+# Test the model on random input data.
+input_shape = input_details[0]['shape']
+interpreter.set_tensor(input_details[0]['index'], im)
+
+interpreter.invoke()
+
+# The function `get_tensor()` returns a copy of the tensor data.
+# Use `tensor()` in order to get a pointer to the tensor.
+output_data = interpreter.get_tensor(output_details[0]['index'])
+               
+
                 
                
 
