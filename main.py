@@ -11,15 +11,15 @@ import torch
 import numpy as np
 from numpy import random
 
-impimport time
 
-import ort time
+
+
 
 import requests
 
 import random
 
-import numpy as np
+
 
 from PIL import Image
 
@@ -320,7 +320,54 @@ image = np.ascontiguousarray(image)
 im = image.astype(np.float32)
 im /= 255
 
+top, bottom = int(round(dh - 0.1)), int(round(dh + 0.1))
+    left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
+    im = cv2.copyMakeBorder(im, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)  # add border
+    return im, r, (dw, dh)
 
+#Name of the classes according to class indices.
+names = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light',
+         'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
+         'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
+         'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard',
+         'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
+         'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
+         'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
+         'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear',
+         'hair drier', 'toothbrush']
+
+#Creating random colors for bounding box visualization.
+colors = {name:[random.randint(0, 255) for _ in range(3)] for i,name in enumerate(names)}
+
+#Load and preprocess the image.
+img = cv2.imread('/content/yolov7/inference/images/bus.jpg')
+img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+image = img.copy()
+image, ratio, dwdh = letterbox(image, auto=False)
+image = image.transpose((2, 0, 1))
+image = np.expand_dims(image, 0)
+image = np.ascontiguousarray(image)
+
+im = image.astype(np.float32)
+im /= 255
+
+
+#Allocate tensors.
+interpreter.allocate_tensors()
+# Get input and output tensors.
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
+
+# Test the model on random input data.
+input_shape = input_details[0]['shape']
+interpreter.set_tensor(input_details[0]['index'], im)
+
+interpreter.invoke()
+
+# The function `get_tensor()` returns a copy of the tensor data.
+# Use `tensor()` in order to get a pointer to the tensor.
+output_data = interpreter.get_tensor(output_details[0]['index'])
 #Allocate tensors.
 interpreter.allocate_tensors()
 # Get input and output tensors.
