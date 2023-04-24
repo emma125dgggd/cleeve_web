@@ -272,9 +272,9 @@ if selected_icon == icon_options["Home"]:
                 im /= 255
 
                 top, bottom = int(round(dh - 0.1)), int(round(dh + 0.1))
-                    left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
-                    im = cv2.copyMakeBorder(im, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)  # add border
-                    return im, r, (dw, dh)
+                left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
+                im = cv2.copyMakeBorder(im, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)  # add border
+                return im, r, (dw, dh)
 
 
 
