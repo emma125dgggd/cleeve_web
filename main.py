@@ -86,60 +86,21 @@ def image_resize(image, width=None, height=None, inter=cv2.INTER_AREA):
 
 
 
-sign = None
-def signup():
-    st.header("Create an account")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    confirm_password = st.text_input("Confirm password", type="password")
 
-    
-
-def login():
-    st.header("Login to your account")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
 
     
 
 
 # Define icon menu options
 icon_options = {
-    "Login": '<img src="https://img.icons8.com/plumpy/24/000000/enter-2.png>',
-    "Signup": '<i class="fas fa-user-plus"></i>',
+    
     "Home": '<i class="fas fa-home"></i>',
-    "Profile": '<i class="fas fa-user"></i>',
-    "About Us": '<i class="fas fa-comment"></i>',
-    "Contact": '<i class="fas fa-envelope"></i>',
-    "Settings": '<i class="fas fa-cog"></i>',
-
+    
+    
 }
 
 # Display icon menu
 selected_icon = st.sidebar.selectbox("Menu", list(icon_options.values()), format_func=lambda x: list(icon_options.keys())[list(icon_options.values()).index(x)])
-
-
-def home():
-    st.markdown(
-        'Cleeve AI is an Assistive Medical Diagnostic Software that speeds up the turn around time of Lab Diagnosis ')
-    st.markdown(
-        """
-        <style>
-        [data-testid="stSidebar"][aria-expanded="true"] > div:first-child {
-            width: 300px;
-        }
-        [data-testid="stSidebar"][aria-expanded="false"] > div:first-child {
-            width: 300px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.video('result_compressed.mp4')
-
-
-
-
 
 # Handle login and signup options
 if selected_icon == icon_options["Home"]:
@@ -343,12 +304,7 @@ if selected_icon == icon_options["Home"]:
                 
                
 
-if selected_icon == icon_options["Signup"]:
-    signup()
 
-
-elif selected_icon == icon_options["Login"]:
-    login()
 else:
     # Do something for other menu options
     pass
