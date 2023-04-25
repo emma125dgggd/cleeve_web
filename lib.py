@@ -171,4 +171,4 @@ def process_slide(uploaded_image):
               name += ' '+str(score)
               cv2.rectangle(image,box[:2],box[2:],color,2)
               cv2.putText(image,name,(box[0], box[1] - 2),cv2.FONT_HERSHEY_SIMPLEX,0.75,[225, 255, 255],thickness=2)  
-          st.image(ori_images[0], use_column_width=True, channels="BGR")
+          st.image(ori_images[0], use_column_width=True, channels="RGB")
