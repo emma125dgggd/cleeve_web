@@ -19,3 +19,7 @@ import matplotlib.pyplot as plt
 #variables
 
 #functions
+def process_slide():
+  
+
+  
