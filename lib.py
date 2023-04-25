@@ -92,7 +92,7 @@ def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleu
         
 def process_slide():
           # Load the TFLite model and allocate tensors.
-          interpreter = tf.lite.Interpreter(model_path="/content/yolov7_model.tflite")
+          interpreter = tf.lite.Interpreter(model_path = "yolov7_model.tflite")
 
 
           #Name of the classes according to class indices.
