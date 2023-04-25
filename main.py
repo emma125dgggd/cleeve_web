@@ -115,10 +115,10 @@ if selected_icon == icon_options["Home"]:
                 file_details = {"filename": UploadedFile.name, "file_type": UploadedFile.type}
                 save_uploaded_file(UploadedFile)
                 paths = []
-                image = "Uploads/{}".format(UploadedFile.name)
-                paths = paths.append(image)
+                uploaded_image = "Uploads/{}".format(UploadedFile.name)
+                paths = paths.append(uploaded_image)
                 st.sidebar.text('Original Image')
-                st.sidebar.image(image)
+                st.sidebar.image(uploaded_image)
 
 
                 
