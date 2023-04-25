@@ -23,9 +23,8 @@ import matplotlib.pyplot as plt
 
 #file saver
 def save_uploaded_file(uploadedfile):
-    with open(os.path.join(uploadedfile.name),"wb") as f:
+    with open(os.path.join("Uploads",uploadedfile.name),"wb") as f:
         f.write(uploadedfile.getbuffer())
-
 
 @st.cache_data
 def image_resize(image, width=None, height=None, inter=cv2.INTER_AREA):
