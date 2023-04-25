@@ -110,9 +110,15 @@ if selected_icon == icon_options["Home"]:
         
 
         if img_file_buffer is None:
-            img_file = st.file_uploader("Upload an image", type=["jpg"],
-                                        accept_multiple_files=True, key=1)
-            
+            for UploadedFile in img_file_buffer:
+                print(UploadedFile)
+                file_details = {"filename": UploadedFile.name, "file_type": UploadedFile.type}
+                save_uploaded_file(UploadedFile)
+                paths = []
+                image = "Uploads/{}".format(UploadedFile.name)
+                paths = paths.append(image)
+                st.sidebar.text('Original Image')
+                st.sidebar.image(image)
 
 
                 
