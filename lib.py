@@ -178,3 +178,5 @@ def process_slide(uploaded_image):
         path = path.append(img_path)
         print(path)
         st.image(ori_images[0], use_column_width=True, channels="RGB")
+        
+        return path
