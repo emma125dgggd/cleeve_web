@@ -18,6 +18,9 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from lib import *
 
+#variables
+paths = []
+
 #Streamlit UI
 st.title('Cleeve AI')
 
@@ -114,7 +117,6 @@ if selected_icon == icon_options["Home"]:
                 print(UploadedFile)
                 file_details = {"filename": UploadedFile.name, "file_type": UploadedFile.type}
                 save_uploaded_file(UploadedFile)
-                paths = []
                 uploaded_image = "Uploads/{}".format(UploadedFile.name)
                 paths = paths.append(uploaded_image)
                 st.sidebar.text('Original Image')
