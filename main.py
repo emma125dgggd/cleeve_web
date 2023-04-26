@@ -109,7 +109,7 @@ if selected_icon == icon_options["Home"]:
                                                    accept_multiple_files=True)
         
 
-        if img_file_buffer is None:
+        if img_file_buffer is not None:
             for UploadedFile in img_file_buffer:
                 print(UploadedFile)
                 file_details = {"filename": UploadedFile.name, "file_type": UploadedFile.type}
