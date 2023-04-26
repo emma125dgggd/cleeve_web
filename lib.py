@@ -17,7 +17,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 
 #variables
-
+path = []
 
 #functions
 
@@ -171,4 +171,10 @@ def process_slide(uploaded_image):
               name += ' '+str(score)
               cv2.rectangle(image,box[:2],box[2:],color,2)
               cv2.putText(image,name,(box[0], box[1] - 2),cv2.FONT_HERSHEY_SIMPLEX,0.75,[225, 255, 255],thickness=2)  
-          st.image(ori_images[0], use_column_width=True, channels="RGB")
+                
+        img_path = os.path.join("Detected_Images", UploadedFile.name)
+        print(img_path)        
+        cv2.imwrite(img_path, ori_images[0])  
+        path = path.append(img_path)
+        print(path)
+        st.image(ori_images[0], use_column_width=True, channels="RGB")
