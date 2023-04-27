@@ -121,6 +121,7 @@ if selected_icon == icon_options["Home"]:
                 paths = paths.append(uploaded_image)
                 st.sidebar.text('Original Image')
                 st.sidebar.image(uploaded_image)
+                paths = []
                 img_path = process_slide(uploaded_image,UploadedFile)
                 paths= paths.append(img_path)
             print(paths)
