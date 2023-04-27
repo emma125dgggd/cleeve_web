@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 from lib import *
 
 #variables
-paths = []
+#paths = []
 
 #Streamlit UI
 st.title('Cleeve AI')
