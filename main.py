@@ -124,7 +124,7 @@ if selected_icon == icon_options["Home"]:
                 paths = []
                 img_path = process_slide(uploaded_image,UploadedFile)
                 paths= paths.append(img_path)
-            print(paths)
+                print(paths)
                 
 
 
