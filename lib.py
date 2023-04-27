@@ -178,6 +178,6 @@ def process_slide(uploaded_image, UploadedFile):
           print(img_path)        
           cv2.imwrite(img_path, ori_images[0])  
           st.image(ori_images[0], use_column_width=True, channels="RGB")
-          returm img_path
+          return img_path
 
         
