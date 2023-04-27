@@ -177,8 +177,8 @@ def process_slide(uploaded_image, UploadedFile):
           img_path = os.path.join("Detected_Images", UploadedFile.name)
           print(img_path)        
           cv2.imwrite(img_path, ori_images[0])  
-          path = path.append(img_path)
-          print(path)
+          #path = path.append(img_path)
+          #print(path)
           st.image(ori_images[0], use_column_width=True, channels="RGB")
 
-          return path
+        
