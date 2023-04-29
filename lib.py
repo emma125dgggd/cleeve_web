@@ -96,7 +96,7 @@ def process_slide(uploaded_image, UploadedFile):
 
 
           #Name of the classes according to class indices.
-          names = ['object']
+          names = ['Pf']
 
           #Creating random colors for bounding box visualization.
           colors = {name:[random.randint(0, 255) for _ in range(3)] for i,name in enumerate(names)}
