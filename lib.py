@@ -199,17 +199,9 @@ def process_slide(uploaded_image, UploadedFile):
               name += ' '+str(score)
               cv2.rectangle(image,box[:2],box[2:],color,2)
               cv2.putText(image,name,(box[0], box[1] - 2),cv2.FONT_HERSHEY_SIMPLEX,0.75,[225, 255, 255],thickness=2)
-              st.write(i)
+              
                 
-          class_counts = {class_name: 0 for class_name in class_names}    
-          # loop through each detection in the output data
-          for detection in output_data:
-             # get the index of the class with the highest score for this detection
-             class_index = int(detection[5])
-             # get the name of the class
-             class_name = class_names[class_index]
-             # increment the count for this class in the dictionary
-             class_counts[class_name] += 1
+          
                 
           img_path = os.path.join("Detected_Images", UploadedFile.name)
           print(img_path)        
