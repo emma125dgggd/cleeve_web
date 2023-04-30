@@ -147,7 +147,37 @@ def process_slide(uploaded_image, UploadedFile):
           # The function `get_tensor()` returns a copy of the tensor data.
           # Use `tensor()` in order to get a pointer to the tensor.
           output_data = interpreter.get_tensor(output_details[0]['index'])
+          def detect_objects(interpreter, image, threshold):
           
+              """Returns a list of detection results, each a dictionary of object info."""
+              # Set the input tensor to the image
+              input_details = interpreter.get_input_details()
+              input_shape = input_details[0]['shape']
+              input_data = np.expand_dims(image, axis=0)
+              interpreter.set_tensor(input_details[0]['index'], input_data)
+
+              # Run inference
+              interpreter.invoke()
+
+              # Get the output tensor values
+              boxes = interpreter.get_tensor(interpreter.get_output_details()[0]['index'])
+              classes = interpreter.get_tensor(interpreter.get_output_details()[1]['index'])
+              scores = interpreter.get_tensor(interpreter.get_output_details()[2]['index'])
+              count = int(interpreter.get_tensor(interpreter.get_output_details()[3]['index']))
+
+              # Create a list of detection results
+              results = []
+              for i in range(count):
+                  if scores[0, i] >= threshold:
+                      result = {
+                          'bounding_box': boxes[0, i],
+                          'class_id': classes[0, i],
+                          'score': scores[0, i]
+                      }
+                      results.append(result)
+              return results
+
+
 
           
           ori_images = [img.copy()]
