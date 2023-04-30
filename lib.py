@@ -179,7 +179,15 @@ def process_slide(uploaded_image, UploadedFile):
 
 
 
-          
+          results = detect_objects(interpreter, image, threshold=0.5)
+
+          print("Detected objects:")
+          for result in results:
+              print(result)
+
+
+
+
           ori_images = [img.copy()]
           class_counts = {}
           for i,(batch_id,x0,y0,x1,y1,cls_id,score) in enumerate(output_data):
