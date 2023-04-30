@@ -150,7 +150,7 @@ def process_slide(uploaded_image, UploadedFile):
 
           
           ori_images = [img.copy()]
-
+          class_counts = {}
           for i,(batch_id,x0,y0,x1,y1,cls_id,score) in enumerate(output_data):
               image = ori_images[int(batch_id)]
               box = np.array([x0,y0,x1,y1])
@@ -160,6 +160,10 @@ def process_slide(uploaded_image, UploadedFile):
               cls_id = int(cls_id)
               score = round(float(score),3)
               name = names[cls_id]
+              if name not in class_counts:
+                class_counts[name] = 1
+              else:
+                class_counts[name] += 1
               color = colors[name]
               name += ' '+str(score)
               cv2.rectangle(image,box[:2],box[2:],color,2)
@@ -176,6 +180,7 @@ def process_slide(uploaded_image, UploadedFile):
           st.image(ori_images[0], use_column_width=True, channels="RGB")
           st.write(img_path)
           #st.write(st.session_state.img_path)
+          st.write(class_count)
           return img_path
 
         
