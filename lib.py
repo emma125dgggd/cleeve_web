@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 
 #variables
 #st.session_state.img_path= []
-
+class_counts = {}
 
 #functions
 
