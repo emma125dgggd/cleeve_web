@@ -180,7 +180,7 @@ def process_slide(uploaded_image, UploadedFile):
           st.image(ori_images[0], use_column_width=True, channels="RGB")
           st.write(img_path)
           #st.write(st.session_state.img_path)
-          st.write(class_count)
+          st.write(class_counts)
           return img_path
 
         
