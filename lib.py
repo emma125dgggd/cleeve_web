@@ -153,7 +153,7 @@ def process_slide(uploaded_image, UploadedFile):
               # Set the input tensor to the image
               input_details = interpreter.get_input_details()
               input_shape = input_details[0]['shape']
-              input_data = np.expand_dims(image, axis=0)
+              input_data = np.array(image, dtype=np.float32)
               interpreter.set_tensor(input_details[0]['index'], input_data)
 
               # Run inference
