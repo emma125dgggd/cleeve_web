@@ -183,7 +183,7 @@ def process_slide(uploaded_image, UploadedFile):
                     results.append(result)
             return results
 
-          results = detect_objects(interpreter, image_pred,threshold =0.2)
+          results = detect_objects(interpreter, image,threshold =0.2)
 
 
 
