@@ -147,44 +147,43 @@ def process_slide(uploaded_image, UploadedFile):
           # The function `get_tensor()` returns a copy of the tensor data.
           # Use `tensor()` in order to get a pointer to the tensor.
           output_data = interpreter.get_tensor(output_details[0]['index'])
+          def set_input_tensor(interpreter, image):
+            """Sets the input tensor."""
+            tensor_index = interpreter.get_input_details()[0]['index']
+            input_tensor = interpreter.tensor(tensor_index)()[0]
+            input_tensor[:, :] = image
+
+ 
+          def get_output_tensor(interpreter, index):
+            """Returns the output tensor at the given index."""
+            output_details = interpreter.get_output_details()[index]
+            tensor = np.squeeze(interpreter.get_tensor(output_details['index']))
+            return tensor
+
+
           def detect_objects(interpreter, image, threshold):
-          
-              """Returns a list of detection results, each a dictionary of object info."""
-              # Set the input tensor to the image
-              input_details = interpreter.get_input_details()
-              input_shape = input_details[0]['shape']
-              input_data = np.array(image, dtype=np.float32)
-              interpreter.set_tensor(input_details[0]['index'], input_data)
+            """Returns a list of detection results, each a dictionary of object info."""
+            set_input_tensor(interpreter, image)
+            interpreter.invoke()
 
-              # Run inference
-              interpreter.invoke()
+            # Get all output details
+            boxes = get_output_tensor(interpreter, 0)
+            classes = get_output_tensor(interpreter, 1)
+            scores = get_output_tensor(interpreter, 2)
+            count = int(get_output_tensor(interpreter, 3))
 
-              # Get the output tensor values
-              boxes = interpreter.get_tensor(interpreter.get_output_details()[0]['index'])
-              classes = interpreter.get_tensor(interpreter.get_output_details()[1]['index'])
-              scores = interpreter.get_tensor(interpreter.get_output_details()[2]['index'])
-              count = int(interpreter.get_tensor(interpreter.get_output_details()[3]['index']))
+            results = []
+            for i in range(count):
+                if scores[i] >= threshold:
+                    result = {
+                        'bounding_box': boxes[i],
+                        'class_id': classes[i],
+                        'score': scores[i]
+                    }
+                    results.append(result)
+            return results
 
-              # Create a list of detection results
-              results = []
-              for i in range(count):
-                  if scores[0, i] >= threshold:
-                      result = {
-                          'bounding_box': boxes[0, i],
-                          'class_id': classes[0, i],
-                          'score': scores[0, i]
-                      }
-                      results.append(result)
-              return results
-
-
-
-          results = detect_objects(interpreter, image, threshold=0.5)
-
-          print("Detected objects:")
-          for result in results:
-              print(result)
-
+          results = detect_objects(interpreter, image_pred,threshold =0.2)
 
 
 
