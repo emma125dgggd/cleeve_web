@@ -151,6 +151,7 @@ def process_slide(uploaded_image, UploadedFile):
         
           ori_images = [img.copy()]
           class_counts = {}
+          list=[]
           for i,(batch_id,x0,y0,x1,y1,cls_id,score) in enumerate(output_data):
               image = ori_images[int(batch_id)]
               box = np.array([x0,y0,x1,y1])
@@ -160,6 +161,7 @@ def process_slide(uploaded_image, UploadedFile):
               cls_id = int(cls_id)
               score = round(float(score),3)
               name = names[cls_id]
+              list.append(name)
               if name not in class_counts:
                 class_counts[name] = 1
               else:
@@ -172,6 +174,10 @@ def process_slide(uploaded_image, UploadedFile):
                 
           
                 
+          if 'P.f' in list:
+            b=list.count('P.f')
+            st.success(f'{b} Parasite detected')
+          
           img_path = os.path.join("Detected_Images", UploadedFile.name)
           print(img_path)        
           cv2.imwrite(img_path, ori_images[0]) 
