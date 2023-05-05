@@ -152,6 +152,7 @@ def process_slide(uploaded_image, UploadedFile):
           ori_images = [img.copy()]
           class_counts = {}
           list=[]
+          score = None
           for i,(batch_id,x0,y0,x1,y1,cls_id,score) in enumerate(output_data):
               image = ori_images[int(batch_id)]
               box = np.array([x0,y0,x1,y1])
@@ -163,7 +164,8 @@ def process_slide(uploaded_image, UploadedFile):
               name = names[cls_id]
               list.append(name)
               if name not in class_counts:
-                class_counts[name] = 1
+                if score >0.4 :
+                    class_counts[name] = 1
               else:
                 class_counts[name] += 1
               color = colors[name]
