@@ -192,4 +192,126 @@ def process_slide(uploaded_image, UploadedFile):
           st.write(class_counts)
           return img_path
 
-        
+ 
+def count_detections(tflite_model_path, image_path, threshold):
+    # Load TFLite model and allocate tensors
+    interpreter = tf.lite.Interpreter(model_path=tflite_model_path)
+    interpreter.allocate_tensors()
+
+    # Get input and output details
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+
+    # Load image and preprocess
+    image = tf.keras.preprocessing.image.load_img(image_path)
+    image = tf.keras.preprocessing.image.img_to_array(image)
+    input_shape = input_details[0]['shape'][1:3]
+    image = tf.image.resize(image, input_shape)
+    image = tf.expand_dims(image, axis=0)
+    image = (image - input_details[0]['quantization'][0]) / input_details[0]['quantization'][1]
+
+    # Run inference
+    interpreter.set_tensor(input_details[0]['index'], image)
+    interpreter.invoke()
+    output = interpreter.get_tensor(output_details[0]['index'])
+
+    # Filter detections based on confidence threshold
+    detections = output[0, np.where(output[0, :, :, 2] > threshold)]
+
+    # Get count of each detected class
+    classes = detections[:, 1].astype(int)
+    counts = {}
+    for c in classes:
+        counts[c] = counts.get(c, 0) + 1
+
+    return counts
+
+
+def get_detection_counts('', image, confidence_threshold):
+    # Load TFLite model and allocate tensors.
+    interpreter = tf.lite.Interpreter(model_path=model_path)
+    interpreter.allocate_tensors()
+    
+    # Get input and output tensors.
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    
+    # Preprocess input image.
+    input_shape = input_details[0]['shape']
+    input_data = np.array(image.resize((input_shape[1], input_shape[2])))
+    input_data = np.expand_dims(input_data, axis=0)
+    input_data = (input_data - input_details[0]['quantization'][0]) * input_details[0]['quantization'][1]
+    
+    # Run inference.
+    interpreter.set_tensor(input_details[0]['index'], input_data)
+    interpreter.invoke()
+    output_data = interpreter.get_tensor(output_details[0]['index'])
+    
+    # Parse output data.
+    num_detections = int(output_data[0])
+    detection_scores = output_data[2][0][:num_detections]
+    detection_classes = output_data[1][0][:num_detections].astype(np.int32)
+    
+    # Count the number of detections for each class.
+    class_counts = {}
+    for i in range(num_detections):
+        if detection_scores[i] >= confidence_threshold:
+            class_id = detection_classes[i]
+            if class_id not in class_counts:
+                class_counts[class_id] = 0
+            class_counts[class_id] += 1
+    
+    return class_counts
+
+
+def process_slide1(uploaded_image, UploadedFile, score_threshold=0.5):
+    # Load the TFLite model and allocate tensors.
+    interpreter = tf.lite.Interpreter(model_path="yolov7_model.tflite")
+
+    # Name of the classes according to class indices.
+    names = ["Pf"]
+
+    # Creating random colors for bounding box visualization.
+    colors = {name: [random.randint(0, 255) for _ in range(3)] for i, name in enumerate(names)}
+
+    # Load and preprocess the image.
+    img = cv2.imread(uploaded_image)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    image = img.copy()
+    image, ratio, dwdh = letterbox(image, auto=False)
+    image = image.transpose((2, 0, 1))
+    image = np.expand_dims(image, 0)
+    image = np.ascontiguousarray(image)
+
+    im = image.astype(np.float32)
+    im /= 255
+
+    # Allocate tensors.
+    interpreter.allocate_tensors()
+
+    # Get input and output tensors.
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+
+    # Test the model on random input data.
+    input_shape = input_details[0]["shape"]
+    interpreter.set_tensor(input_details[0]["index"], im)
+
+    interpreter.invoke()
+
+    # The function `get_tensor()` returns a copy of the tensor data.
+    # Use `tensor()` in order to get a pointer to the tensor.
+    output_data = interpreter.get_tensor(output_details[0]["index"])
+
+    # Extract the detection boxes and their respective scores
+    detection_boxes = output_data[:, :, 0:4]
+    detection_scores = output_data[:, :, 4:]
+
+    # Count the number of detections with score greater than the threshold
+    num_detections = np.sum(detection_scores > score_threshold)
+
+    # Allocate tensors.
+    interpreter.allocate_tensors()
+
+    return num_detections
