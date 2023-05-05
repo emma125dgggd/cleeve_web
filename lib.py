@@ -174,8 +174,8 @@ def process_slide(uploaded_image, UploadedFile):
                 
           
                 
-          if 'P.f' in list:
-            b=list.count('P.f')
+          if 'Pf' in list:
+            b=list.count('Pf')
             st.success(f'{b} Parasite detected')
           
           img_path = os.path.join("Detected_Images", UploadedFile.name)
