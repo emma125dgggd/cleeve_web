@@ -227,7 +227,7 @@ def count_detections(tflite_model_path, image_path, threshold):
     return counts
 
 
-def get_detection_counts('', image, confidence_threshold):
+def get_detection_counts(image, confidence_threshold):
     # Load TFLite model and allocate tensors.
     interpreter = tf.lite.Interpreter(model_path=model_path)
     interpreter.allocate_tensors()
