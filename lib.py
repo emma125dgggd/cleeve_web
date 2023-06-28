@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 
 
 #variables
+classes_to_filter = None
 opt = {
 
     "weights": "best.pt",
