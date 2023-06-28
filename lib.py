@@ -216,7 +216,7 @@ def counter(json_file):
                     cropobj = img0[int(xyxy[1]):int(xyxy[3]), int(xyxy[0]):int(xyxy[2])]
 
                     # save crop part
-                    crop_file_path = os.path.join("crop", str(uuid.uuid4()) + ".jpg")
+                    crop_file_path = os.path.join("crop", "pic.jpg")
                     cv2.imwrite(crop_file_path, cropobj)
                     crp_cnt = crp_cnt + 1
 
