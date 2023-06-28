@@ -113,6 +113,19 @@ if selected_icon == icon_options["Home"]:
                     # Convert the dictionary to JSON
                     json_string = json.dumps(json_data)
                 st.image(uploaded_image)
+                data = json.loads(json_string)
+
+                # Retrieve the image data from the JSON
+                image_data = data["image_data"]
+                
+                # Decode the base64-encoded image data
+                decoded_image_data = base64.b64decode(image_data)
+                
+                # Save the image to a file
+                with open(data["filename"], "wb") as file:
+                    file.write(decoded_image_data)
+                
+                st.image(data["filename"])
                 st.write(json_string)
                 image, count = counter(json_string)
                 data = json.loads(image)
