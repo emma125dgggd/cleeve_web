@@ -106,11 +106,11 @@ def count(founded_classes,im0):
   return v,w
 
 def counter(json):
-    data = json.loads(json, image)
+    data = json.loads(json)
 
     # Retrieve the image data from the JSON
     image_data = data["image_data"]
-    
+    image = data["filename"]
     # Decode the base64-encoded image data
     decoded_image_data = base64.b64decode(image_data)
     
