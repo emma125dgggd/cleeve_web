@@ -91,227 +91,107 @@ def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleu
           return im, r, (dw, dh)
         
         
-def process_slide(uploaded_image, UploadedFile):
-          # Load the TFLite model and allocate tensors.
-          interpreter = tf.lite.Interpreter(model_path = "yolov7_model.tflite")
+def count(founded_classes,im0):
+  model_values=[]
+  aligns=im0.shape
+  align_bottom=aligns[0]
+  align_right=(aligns[1]/1.7 ) 
 
+  for i, (k, v) in enumerate(founded_classes.items()):
+    a=f"{k} = {v}"
+    model_values.append(v)
+    w= model_values[0]
+    align_bottom=align_bottom-35                                                   
+    #cv2.putText(im0, str(a) ,(int(align_right),align_bottom), cv2.FONT_HERSHEY_SIMPLEX, 1,(45,255,255),1,cv2.LINE_AA)
+  return v,w
 
-          #Name of the classes according to class indices.
-          names = ['Pf']
+def counter():
+    with torch.no_grad():
+        weights, imgsz = opt['weights'], opt['img-size']
+        set_logging()
+        device = select_device(opt['device'])
+        half = device.type != 'cpu'
 
-          #Creating random colors for bounding box visualization.
-          colors = {name:[random.randint(0, 255) for _ in range(3)] for i,name in enumerate(names)}
+        model = attempt_load(weights, map_location='cpu') 
+        #model = torch.hub.load_state_dict_from_url(url, map_location=torch.device('cpu'))
 
-          #Load and preprocess the image.
-          img = cv2.imread(uploaded_image)
-          img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        stride = int(model.stride.max())  # model stride
+        imgsz = check_img_size(imgsz, s=stride)  # check img_size
+        if half:
+            model.half()
 
-          image = img.copy()
-          image, ratio, dwdh = letterbox(image, auto=False)
-          image = image.transpose((2, 0, 1))
-          image = np.expand_dims(image, 0)
-          image = np.ascontiguousarray(image)
+        names = model.module.names if hasattr(model, 'module') else model.names
+        colors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
+        if device.type != 'cpu':
+            model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))
 
-          im = image.astype(np.float32)
-          im /= 255
+        img0 = cv2.imread(image)
+        img = letterbox(img0, imgsz, stride=stride)[0]
+        img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+        img = np.ascontiguousarray(img)
+        img = torch.from_numpy(img).to(device)
+        img = img.half() if half else img.float()  # uint8 to fp16/32
+        img /= 255.0  # 0 - 255 to 0.0 - 1.0
+        if img.ndimension() == 3:
+            img = img.unsqueeze(0)
 
-         
+        # Inference
+        t1 = time_synchronized()
+        pred = model(img, augment=False)[0]
 
-          #Allocate tensors.
-          interpreter.allocate_tensors()
-          # Get input and output tensors.
-          input_details = interpreter.get_input_details()
-          output_details = interpreter.get_output_details()
+        # Apply NMS
+        classes = None
+        if opt['classes']:
+            classes = []
+            for class_name in opt['classes']:
+                classes.append(opt['classes'].index(class_name))
 
-          # Test the model on random input data.
-          input_shape = input_details[0]['shape']
-          interpreter.set_tensor(input_details[0]['index'], im)
+        pred = non_max_suppression(pred, opt['conf-thres'], opt['iou-thres'], classes=classes,
+                                   agnostic=False)
+        t2 = time_synchronized()
+        v=0
 
-          interpreter.invoke()
+        sum =[]
+        for i, det in enumerate(pred):
+            s = ''
+            s += '%gx%g ' % img.shape[2:]  # print string
+            gn = torch.tensor(img0.shape)[[1, 0, 1, 0]]
+            if len(det):
+                det[:, :4] = scale_coords(img.shape[2:], det[:, :4], img0.shape).round()  
+                founded_classes={} # Creating a dict to storage our detected items
+                for c in det[:, -1].unique():
+                    n = (det[:, -1] == c).sum()  # detections per class
+                    s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+                    class_index=int(c)
+                    count_of_object=int(n)
+                    founded_classes[names[class_index]]=int(n)
+                    v, w =count(founded_classes=founded_classes,im0=img0)  # Applying counter function
+                    #total(founded_classes,im0=img0,total_last) 
 
-          # The function `get_tensor()` returns a copy of the tensor data.
-          # Use `tensor()` in order to get a pointer to the tensor.
-          output_data = interpreter.get_tensor(output_details[0]['index'])
-          #Allocate tensors.
-          interpreter.allocate_tensors()
-          # Get input and output tensors.
-          input_details = interpreter.get_input_details()
-          output_details = interpreter.get_output_details()
+                crp_cnt = 0
 
-          # Test the model on random input data.
-          input_shape = input_details[0]['shape']
-          interpreter.set_tensor(input_details[0]['index'], im)
+                for *xyxy, conf, cls in reversed(det):
+                    label = f'{names[int(cls)]} {conf:.2f}'
+                    plot_one_box(xyxy, img0, label=None, color=colors[int(cls)], line_thickness=3)
 
-          interpreter.invoke()
+                    # crop
+                    # crop an image based on coordinates
+                    object_coordinates = [int(xyxy[0]), int(xyxy[1]), int(xyxy[2]), int(xyxy[3])]
+                    cropobj = img0[int(xyxy[1]):int(xyxy[3]), int(xyxy[0]):int(xyxy[2])]
 
-          # The function `get_tensor()` returns a copy of the tensor data.
-          # Use `tensor()` in order to get a pointer to the tensor.
-          output_data = interpreter.get_tensor(output_details[0]['index'])
-          
+                    # save crop part
+                    crop_file_path = os.path.join("crop", str(uuid.uuid4()) + ".jpg")
+                    cv2.imwrite(crop_file_path, cropobj)
+                    crp_cnt = crp_cnt + 1
+
+        img_path = os.path.join("runs", UploadedFile.name)
+        st.session_state.img_path = img_path
+        print(img_path)
+        cv2.imwrite(img_path, img0)
+        st.subheader('Output Image')
+        st.image(img0, use_column_width=True, channels="BGR")
+        total.append(v)
+        total2.append(w)
         
-          ori_images = [img.copy()]
-          class_counts = {}
-          list=[]
-          score = None
-          for i,(batch_id,x0,y0,x1,y1,cls_id,score) in enumerate(output_data):
-              image = ori_images[int(batch_id)]
-              box = np.array([x0,y0,x1,y1])
-              box -= np.array(dwdh*2)
-              box /= ratio
-              box = box.round().astype(np.int32).tolist()
-              cls_id = int(cls_id)
-              score = round(float(score),3)
-              name = names[cls_id]
-              list.append(name)
-              if name not in class_counts:
-                if score >0.4 :
-                    class_counts[name] = 1
-              else:
-                class_counts[name] += 1
-              color = colors[name]
-              name += ' '+str(score)
-              cv2.rectangle(image,box[:2],box[2:],color,2)
-              cv2.putText(image,name,(box[0], box[1] - 2),cv2.FONT_HERSHEY_SIMPLEX,0.75,[225, 255, 255],thickness=2)
-              
-                
-          
-                
-          if 'Pf' in list:
-            b=list.count('Pf')
-            st.success(f'{b} Parasite detected')
-          
-          img_path = os.path.join("Detected_Images", UploadedFile.name)
-          print(img_path)        
-          cv2.imwrite(img_path, ori_images[0]) 
-          #if "img_path" not in st.session_state:
-              #st.session_state.img_path = []
-          #    st.session_state.img_path= st.session_state.img_path.append(img_path)
-          st.image(ori_images[0], use_column_width=True, channels="RGB")
-          st.write(img_path)
-          #st.write(st.session_state.img_path)
-          st.write(class_counts)
-          return img_path
+    return v, w
 
- 
-def count_detections(tflite_model_path, image_path, threshold):
-    # Load TFLite model and allocate tensors
-    interpreter = tf.lite.Interpreter(model_path=tflite_model_path)
-    interpreter.allocate_tensors()
-
-    # Get input and output details
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-
-    # Load image and preprocess
-    image = tf.keras.preprocessing.image.load_img(image_path)
-    image = tf.keras.preprocessing.image.img_to_array(image)
-    input_shape = input_details[0]['shape'][1:3]
-    image = tf.image.resize(image, input_shape)
-    image = tf.expand_dims(image, axis=0)
-    image = (image - input_details[0]['quantization'][0]) / input_details[0]['quantization'][1]
-
-    # Run inference
-    interpreter.set_tensor(input_details[0]['index'], image)
-    interpreter.invoke()
-    output = interpreter.get_tensor(output_details[0]['index'])
-
-    # Filter detections based on confidence threshold
-    detections = output[0, np.where(output[0, :, :, 2] > threshold)]
-
-    # Get count of each detected class
-    classes = detections[:, 1].astype(int)
-    counts = {}
-    for c in classes:
-        counts[c] = counts.get(c, 0) + 1
-
-    return counts
-
-
-def get_detection_counts(image, confidence_threshold):
-    # Load TFLite model and allocate tensors.
-    interpreter = tf.lite.Interpreter(model_path=model_path)
-    interpreter.allocate_tensors()
-    
-    # Get input and output tensors.
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-    
-    # Preprocess input image.
-    input_shape = input_details[0]['shape']
-    input_data = np.array(image.resize((input_shape[1], input_shape[2])))
-    input_data = np.expand_dims(input_data, axis=0)
-    input_data = (input_data - input_details[0]['quantization'][0]) * input_details[0]['quantization'][1]
-    
-    # Run inference.
-    interpreter.set_tensor(input_details[0]['index'], input_data)
-    interpreter.invoke()
-    output_data = interpreter.get_tensor(output_details[0]['index'])
-    
-    # Parse output data.
-    num_detections = int(output_data[0])
-    detection_scores = output_data[2][0][:num_detections]
-    detection_classes = output_data[1][0][:num_detections].astype(np.int32)
-    
-    # Count the number of detections for each class.
-    class_counts = {}
-    for i in range(num_detections):
-        if detection_scores[i] >= confidence_threshold:
-            class_id = detection_classes[i]
-            if class_id not in class_counts:
-                class_counts[class_id] = 0
-            class_counts[class_id] += 1
-    
-    return class_counts
-
-
-def process_slide1(uploaded_image, UploadedFile, score_threshold=0.5):
-    # Load the TFLite model and allocate tensors.
-    interpreter = tf.lite.Interpreter(model_path="yolov7_model.tflite")
-
-    # Name of the classes according to class indices.
-    names = ["Pf"]
-
-    # Creating random colors for bounding box visualization.
-    colors = {name: [random.randint(0, 255) for _ in range(3)] for i, name in enumerate(names)}
-
-    # Load and preprocess the image.
-    img = cv2.imread(uploaded_image)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-    image = img.copy()
-    image, ratio, dwdh = letterbox(image, auto=False)
-    image = image.transpose((2, 0, 1))
-    image = np.expand_dims(image, 0)
-    image = np.ascontiguousarray(image)
-
-    im = image.astype(np.float32)
-    im /= 255
-
-    # Allocate tensors.
-    interpreter.allocate_tensors()
-
-    # Get input and output tensors.
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-
-    # Test the model on random input data.
-    input_shape = input_details[0]["shape"]
-    interpreter.set_tensor(input_details[0]["index"], im)
-
-    interpreter.invoke()
-
-    # The function `get_tensor()` returns a copy of the tensor data.
-    # Use `tensor()` in order to get a pointer to the tensor.
-    output_data = interpreter.get_tensor(output_details[0]["index"])
-
-    # Extract the detection boxes and their respective scores
-    detection_boxes = output_data[:, :, 0:4]
-    detection_scores = output_data[:, :, 4:]
-
-    # Count the number of detections with score greater than the threshold
-    num_detections = np.sum(detection_scores > score_threshold)
-
-    # Allocate tensors.
-    interpreter.allocate_tensors()
-
-    return num_detections
