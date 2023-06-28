@@ -4,5 +4,5 @@ from firebase_admin import storage
 
 firebase_storage = storage.bucket()
 
-blob = firebase_storage.blob('model/best (3).pt')
+blob = firebase_storage.blob('best (3).pt')
 blob.download_to_filename('best.pt')
