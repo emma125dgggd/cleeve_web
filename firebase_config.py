@@ -3,7 +3,7 @@ from firebase_admin import credentials, auth, storage, db
 
 
 
-cred = credentials.Certificate('firebase-adminsdk.json')
+cred = credentials.Certificate('cleeve-api-firebase-adminsdk.json')
 
 try:
 
@@ -11,6 +11,5 @@ try:
 
 except ValueError:
     firebase_admin.initialize_app(cred, {
-    'databaseURL': "https://cleeve-database-default-rtdb.europe-west1.firebasedatabase.app/",
-    'storageBucket': "cleeve-database.appspot.com" 
+    'storageBucket': "cleeve-api.appspot.com" 
 })
