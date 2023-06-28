@@ -114,6 +114,31 @@ if selected_icon == icon_options["Home"]:
                     json_string = json.dumps(json_data)
                 st.image(uploaded_image)
                 image, count = counter(json_string)
+                data = json.loads(image)
+
+                # Retrieve the image data from the JSON
+                image_data = data["image_data"]
+                
+                # Decode the base64-encoded image data
+                decoded_image_data = base64.b64decode(image_data)
+                
+                # Save the image to a file
+                with open(data["filename"], "wb") as file:
+                    file.write(decoded_image_data)
+                
+                st.image(data["filename"])
+                
+                count_data = json.loads(json_string)
+
+                # Access the decoded data
+                Parasite = count_data["Parasite"]
+                WBC = count_data["WBC"]
+                
+                # Print or use the decoded data as needed
+                st.success(f'Parasite Detected: {Parasite} ')
+                st.success(f'WBC Detected: {WBC} ')
+                st.write(image)
+                st.write(count)
                 
                 
     
