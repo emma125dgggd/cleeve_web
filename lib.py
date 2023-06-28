@@ -107,7 +107,7 @@ def count(founded_classes,im0):
   return v,w
 
 def counter(json):
-    with open(json_file_path, "r") as json_file:
+    with open(json, "r") as json_file:
         # Load the JSON data from the file
         json_data = json.load(json_file)
     
