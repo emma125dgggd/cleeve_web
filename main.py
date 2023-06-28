@@ -146,8 +146,8 @@ if selected_icon == icon_options["Home"]:
                 # Print or use the decoded data as needed
                 st.success(f'Parasite Detected: {Parasite} ')
                 st.success(f'WBC Detected: {WBC} ')
-                st.write(image)
-                st.write(count)
+                #st.write(image)
+                #st.write(count)
                 
                 
     
