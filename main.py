@@ -21,10 +21,10 @@ from lib import *
 
 #variables
 #paths = []
-def counter(json):
-    with open(json, "r") as json_file:
+def counter(json_file):
+    with open(json_file, "r") as file:
         # Load the JSON data from the file
-        data = json.load(json_file)
+        data = json.load(file)
     
     #data = json.loads(json)
 
