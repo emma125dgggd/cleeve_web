@@ -18,7 +18,10 @@ from collections import OrderedDict,namedtuple
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import torch
+import firebase_config
+import model_config
 from lib import *
+
 
 #variables
 #paths = []
