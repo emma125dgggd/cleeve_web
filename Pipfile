@@ -20,7 +20,7 @@ tensorflow-cpu = "*"
 pandas = ">=1.1.4"
 seaborn = ">=0.11.0"
 streamlit = ">=1.19.0"
-firebase-admin = "*"
+firebase-admin = "11.9.0"
 opencv-python-headless = ">=4.1.1"
 [dev-packages]
 
