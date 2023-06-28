@@ -113,6 +113,7 @@ if selected_icon == icon_options["Home"]:
                     # Convert the dictionary to JSON
                     json_string = json.dumps(json_data)
                 st.image(uploaded_image)
+                st.write(json_string)
                 image, count = counter(json_string)
                 data = json.loads(image)
 
