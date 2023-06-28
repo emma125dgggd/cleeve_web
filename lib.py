@@ -105,7 +105,19 @@ def count(founded_classes,im0):
     #cv2.putText(im0, str(a) ,(int(align_right),align_bottom), cv2.FONT_HERSHEY_SIMPLEX, 1,(45,255,255),1,cv2.LINE_AA)
   return v,w
 
-def counter():
+def counter(json):
+    data = json.loads(json, image)
+
+    # Retrieve the image data from the JSON
+    image_data = data["image_data"]
+    
+    # Decode the base64-encoded image data
+    decoded_image_data = base64.b64decode(image_data)
+    
+    # Save the image to a file
+    with open(image, "wb") as file:
+        file.write(decoded_image_data)
+    
     with torch.no_grad():
         weights, imgsz = opt['weights'], opt['img-size']
         set_logging()
