@@ -2,6 +2,7 @@
 
 #Imports
 import base64
+import json
 import tempfile
 import sys
 import os
@@ -70,28 +71,8 @@ if selected_icon == icon_options["Home"]:
     app_mode = st.sidebar.selectbox('Diagnosis',
                                     ["Demo", "Slide Image", 'Slide Video']
                                     )
-    if app_mode =='Demo':
-        st.markdown(
-        """
-        <style>
-        [data-testid="stSidebar"][aria-expanded="true"] > div:first-child {
-            width: 300px;
-        }
-        [data-testid="stSidebar"][aria-expanded="false"] > div:first-child {
-            width: 300px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-        )
-        st.video('result_compressed.mp4')
-
-    if app_mode == 'Slide Video':
-        st.video('result_compressed.mp4')
-
-        
-
-    elif app_mode == 'Slide Image':
+    
+    if app_mode == 'Slide Image':
 
         st.markdown(
             """
@@ -118,10 +99,43 @@ if selected_icon == icon_options["Home"]:
                 file_details = {"filename": UploadedFile.name, "file_type": UploadedFile.type}
                 save_uploaded_file(UploadedFile)
                 uploaded_image = "Uploads/{}".format(UploadedFile.name)
-                st.sidebar.text('Original Image')
-                st.sidebar.image(uploaded_image)
-                path = process_slide(uploaded_image,UploadedFile)
-                #st.write(path)
+                with open(uploaded_image, "rb") as file:
+                    image_data = file.read()
+                    # Encode the image data as base64
+                    encoded_image_data = base64.b64encode(image_data).decode("utf-8")
+                    
+                    # Create a dictionary for the JSON object
+                    json_data = {
+                        "filename": UploadedFile.name,
+                        "image_data": encoded_image_data
+                    }
+                    
+                    # Convert the dictionary to JSON
+                    json_string = json.dumps(json_data)
+                st.image(uploaded_image)
+                counter(json_string)
+    
+    elif app_mode =='Demo':
+        st.markdown(
+        """
+        <style>
+        [data-testid="stSidebar"][aria-expanded="true"] > div:first-child {
+            width: 300px;
+        }
+        [data-testid="stSidebar"][aria-expanded="false"] > div:first-child {
+            width: 300px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+        )
+        st.video('result_compressed.mp4')
+
+    elif app_mode == 'Slide Video':
+        st.video('result_compressed.mp4')
+
+        
+
                 
                 
 
@@ -129,10 +143,6 @@ if selected_icon == icon_options["Home"]:
                 
                
 
-
-else:
-    # Do something for other menu options
-    pass
 
 
 
