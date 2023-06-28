@@ -122,7 +122,7 @@ if selected_icon == icon_options["Home"]:
                     json.dump(json_data, json_file)
                 st.image(uploaded_image)
                 
-                image, count = counter(json_file_path)
+                image, count = process_slide(json_file_path)
                 data = json.loads(image)
 
                 # Retrieve the image data from the JSON
