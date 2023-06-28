@@ -162,6 +162,7 @@ def counter(json):
                                    agnostic=False)
         t2 = time_synchronized()
         v=0
+        w=0
 
         sum =[]
         for i, det in enumerate(pred):
@@ -196,14 +197,36 @@ def counter(json):
                     cv2.imwrite(crop_file_path, cropobj)
                     crp_cnt = crp_cnt + 1
 
-        img_path = os.path.join("runs", UploadedFile.name)
+        img_path = os.path.join("runs", data["filename"])
+        
         st.session_state.img_path = img_path
         print(img_path)
         cv2.imwrite(img_path, img0)
-        st.subheader('Output Image')
-        st.image(img0, use_column_width=True, channels="BGR")
-        total.append(v)
-        total2.append(w)
+        with open(img_path, "rb") as file:
+            image_data = file.read()
+
+        # Encode the image data as base64
+        encoded_image_data = base64.b64encode(image_data).decode("utf-8")
         
-    return v, w
+        # Create a dictionary for the JSON object
+        json_image = {
+            "filename": data["filename"],
+            "image_data": encoded_image_data
+            
+        }
+        
+        # Convert the dictionary to JSON
+        json_string = json.dumps(json_image)
+        count_dict = {
+            "Parasite": v,
+            "WBC": w
+        }
+        
+        # Convert the dictionary to JSON
+        json_count = json.dumps(count_dict)
+        
+        # Print or use the JSON string as needed
+        
+
+    return json_string, json_count
 
