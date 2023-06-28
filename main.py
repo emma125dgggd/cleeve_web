@@ -128,7 +128,7 @@ if selected_icon == icon_options["Home"]:
                 
                 st.image(data["filename"])
                 
-                count_data = json.loads(json_string)
+                count_data = json.loads(count)
 
                 # Access the decoded data
                 Parasite = count_data["Parasite"]
