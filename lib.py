@@ -14,7 +14,7 @@ import random
 from PIL import Image
 from pathlib import Path
 from collections import OrderedDict,namedtuple
-import tensorflow as tf
+import torch
 import matplotlib.pyplot as plt
 
 #variables
