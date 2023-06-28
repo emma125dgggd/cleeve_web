@@ -17,9 +17,21 @@ from collections import OrderedDict,namedtuple
 import torch
 import matplotlib.pyplot as plt
 
+
+
 #variables
-#st.session_state.img_path= []
-class_counts = {}
+opt = {
+
+    "weights": "best.pt",
+    # Path to weights file default weights are for nano model
+    "yaml": "data/coco.yaml",
+    "img-size": 1250,  # default image size
+    "conf-thres": 0.25,  # confidence threshold for inference.
+    "iou-thres": 0.5,  # NMS IoU threshold for inference.
+    "device": 'cpu',  # device to run our model i.e. 0 or 0,1,2,3 or cpu
+    "classes": classes_to_filter  # list of classes to filter or None
+
+}
 
 #functions
 
