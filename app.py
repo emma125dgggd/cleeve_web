@@ -10,10 +10,10 @@ app = FastAPI()
 @app.post("/process-slide")
 async def process_slide_api(json_obj: dict):
     try:
-        response = process_slide(json_obj)
+        count, image = process_slide(json_obj)
 
         # Return the response as JSON
-        return response
+        return count, image
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
