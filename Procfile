@@ -1,1 +1,1 @@
-web: gunicorn cleeve-app:app
+web: gunicorn cleeve:app
