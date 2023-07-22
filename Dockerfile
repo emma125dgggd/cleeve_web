@@ -19,6 +19,5 @@ EXPOSE 8000
 
 HEALTHCHECK CMD curl --fail http://localhost:8000/health
 
-ENTRYPOINT ["/app/run.sh"]
-
+CMD ["uvicorn", "app:app"] 
 #[pipenv", "run", "streamlit", "run", "main.py", "--server.port=8501", "--server.address=0.0.0.0"]
